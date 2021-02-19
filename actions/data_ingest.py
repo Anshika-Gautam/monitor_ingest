@@ -2,6 +2,8 @@ import yaml
 from st2common.runners.base_action import Action
 from mam.sdk import entitytype
 
+from oslo_config import cfg
+
 __all__ = ["IngestCsvDataAction"]
 
 
@@ -10,8 +12,12 @@ class IngestCsvDataAction(Action):
         super(IngestCsvDataAction, self).__init__(config)
         self._config = self.config
         self._credentials = self._config.get('credentials', None)
-        self._data_file_path = '/opt/stackstorm/packs/monitor_ingest/etc/' \
-                                'clean_data_output/clean_data.csv'
+        system_packs_base_path = cfg.CONF.content.system_packs_base_path
+        path_of_pack = system_packs_base_path + '/monitor_ingest'
+        self._data_file_path = path_of_pack + '/etc/clean_data_output/' \
+                                              'clean_data.csv'
+        # self._data_file_path = '/opt/stackstorm/packs/monitor_ingest/etc/' \
+        #                         'clean_data_output/clean_data.csv'
         self._entity_name = self._config.get('entity_name', None)
         
         if not self._config:

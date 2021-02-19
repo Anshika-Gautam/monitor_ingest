@@ -24,24 +24,32 @@ class SetupEntityAction(Action):
 
     def run(self):
         operations_completed = {}
-        entitytype_data_path = None
-        constants_data_path = None
-        dimension_data_path = None
-        function_data_path = None
         
         if self._action_type == "SetupEntityAction":
-            entitytype_data_path = self._data_file_path
+            self.setup_EntityAction(operations_completed)
         elif self._action_type == "SetupAddConstants":
-            constants_data_path = self._data_file_path
+            self.setup_AddConstants(operations_completed)
         elif self._action_type == "SetupAddDimesions":
-            dimension_data_path = self._data_file_path       
+            self.setup_AddDimesions(operations_completed)
         elif self._action_type == "SetupAddFunctions":
-            function_data_path = self._data_file_path      
-        
-        if entitytype_data_path:
+            self.setup_AddFunctions(operations_completed)
+
+        """----------STATUS----------"""
+        print('RESULT :')
+        for name, status in operations_completed.items():
+            print(f'Operation: {name} status: {status}')
+            if status:
+                success = True
+            else:
+                success = False
+
+        return success
+
+    def setup_EntityAction(self, operations_completed):
+        if self._data_file_path:
             """------Usage: 1. (X) Create Entity Type - using a json payload-----"""
             operations_completed['create_entity'] = False
-            with open(entitytype_data_path, 'r') as f:
+            with open(self._data_file_path, 'r') as f:
                 try:
                     op_create = entitytype.create_custom_entitytype(f.read(), 
                                                                     credentials = self._credentials)
@@ -50,10 +58,11 @@ class SetupEntityAction(Action):
                 except Exception as msg:
                     print(f'FAILED STEP: {msg}\nFailed create Entity Type operation')
 
-        if constants_data_path:
+    def setup_AddFunctions(self, operations_completed):
+        if self._data_file_path:
             """------Usage: 2. (X) Add Function - using a json payload------"""
             operations_completed['add_functions'] = False
-            with open(function_data_path, 'r') as f:
+            with open(self._data_file_path, 'r') as f:
                 try:
                     op_add = kpifunction.add_functions(f.read(), 
                                                        credentials = self._credentials)
@@ -61,11 +70,12 @@ class SetupEntityAction(Action):
                     operations_completed['add_functions'] = True
                 except Exception as msg:
                     print(f'FAILED STEP: {msg}\nFailed add functions operation')
-                    
-        if function_data_path:
+
+    def setup_AddDimesions(self, operations_completed):
+        if self._data_file_path:
             """------Usage: 3. (X) Add Dimension - using a json payload------"""
             operations_completed['add_dimension_data'] = False
-            with open(dimension_data_path, 'r') as f:
+            with open(self._data_file_path, 'r') as f:
                 try:
                     op_add = dimension.add_dimensions_data(f.read(), 
                                                            credentials = self._credentials)
@@ -73,11 +83,12 @@ class SetupEntityAction(Action):
                     operations_completed['add_dimension_data'] = True
                 except Exception as msg:
                     print(f'FAILED STEP: {msg}\nFailed add dimension data operation')
-                    
-        if dimension_data_path:
+
+    def setup_AddConstants(self, operations_completed):
+        if self._data_file_path:
             """------Usage: 4. (X) Create Constants - using a json payload------"""
             operations_completed['create_constants'] = False
-            with open(constants_data_path, 'r') as f:
+            with open(self._data_file_path, 'r') as f:
                 try:
                     op_create = constants.create_constants(f.read(), 
                                                            credentials = self._credentials)
@@ -86,13 +97,3 @@ class SetupEntityAction(Action):
                 except Exception as msg:
                     print(f'FAILED STEP: {msg}\nFailed Create Constants operation')
 
-        """----------STATUS----------"""
-        print('RESULT :')
-        for name, status in operations_completed.items():
-            print(f'Operation: {name} status: {status}')
-            if status == True:
-                success = True
-            else :
-                success = False
-                
-        return success
